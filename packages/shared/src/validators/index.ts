@@ -118,6 +118,13 @@ export {
 } from "./asset.js";
 
 export {
+  createConversationSchema,
+  sendChatMessageSchema,
+  type CreateConversation,
+  type SendChatMessage,
+} from "./chat.js";
+
+export {
   createCompanyInviteSchema,
   createOpenClawInvitePromptSchema,
   acceptInviteSchema,

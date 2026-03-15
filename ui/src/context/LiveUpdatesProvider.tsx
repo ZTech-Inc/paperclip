@@ -493,6 +493,28 @@ function handleLiveEvent(
     return;
   }
 
+  if (event.type === "chat.message") {
+    queryClient.invalidateQueries({ queryKey: queryKeys.chat.list(expectedCompanyId) });
+    const conversationId = readString(payload.conversationId);
+    if (conversationId) {
+      queryClient.invalidateQueries({ queryKey: queryKeys.chat.messages(conversationId) });
+    }
+    const senderType = readString(payload.senderType);
+    if (senderType === "agent") {
+      const agentName = resolveAgentName(queryClient, expectedCompanyId, readString(payload.senderAgentId) ?? "");
+      const name = agentName ?? "Agent";
+      const body = readString(payload.body);
+      gatedPushToast(gate, pushToast, "chat-message", {
+        title: `${name} sent a message`,
+        body: body ? truncate(body, 80) : undefined,
+        tone: "info",
+        action: conversationId ? { label: "View chat", href: `/chat/${conversationId}` } : undefined,
+        dedupeKey: `chat:${conversationId}:${readString(payload.messageId) ?? ""}`,
+      });
+    }
+    return;
+  }
+
   if (event.type === "activity.logged") {
     invalidateActivityQueries(queryClient, expectedCompanyId, payload);
     const action = readString(payload.action);
